@@ -1,0 +1,28 @@
+.user-selection-bar {
+  display: flex;
+  overflow-x: auto; /* 横スクロールを可能にする */
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.8); /* 半透明の背景 */
+  border-top: 1px solid #eee;
+  white-space: nowrap; /* アイコンが折り返さないようにする */
+}
+
+.user-selection-item {
+  flex-shrink: 0; /* アイコンが縮まないようにする */
+  margin-right: 10px;
+  cursor: pointer;
+  border: 2px solid transparent; /* デフォルトの枠線 */
+  border-radius: 50%; /* 丸い枠線 */
+  transition: border-color 0.2s ease-in-out;
+}
+
+.user-selection-item.selected {
+  border-color: #007bff; /* 選択中の青い枠線 */
+}
+
+.user-selection-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover; /* 画像がはみ出さないようにする */
+}

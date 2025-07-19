@@ -1,0 +1,21 @@
+
+.room-item {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.room-item:hover {
+  background-color: #f9f9f9;
+}
+
+.room-item h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+}
+
+.room-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}

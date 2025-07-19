@@ -1,0 +1,28 @@
+.chat-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #ccc;
+  background-color: #00b900; /* LINE green */
+  color: white;
+}
+
+.chat-header button {
+  margin-right: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 24px; /* Larger back arrow */
+  color: white;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
