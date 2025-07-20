@@ -5,7 +5,7 @@ import { getRooms, createRoom } from '../services/chatService';
 import { logout } from '../services/authService';
 import { getUsers } from '../services/userService';
 
-const ChatManager = ({ currentUser }) => {
+const ChatManager = ({ currentUser, onSendMessage, shouldFocusInput }) => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [users, setUsers] = useState([]);
@@ -42,7 +42,7 @@ const ChatManager = ({ currentUser }) => {
   return (
     <>
       {selectedRoom ? (
-        <ChatScreen room={selectedRoom} onBack={handleBackToSelect} currentUser={currentUser} users={users} />
+        <ChatScreen room={selectedRoom} onBack={handleBackToSelect} currentUser={currentUser} users={users} onSendMessage={onSendMessage} shouldFocusInput={shouldFocusInput} />
       ) : (
         <ChatSelectScreen onRoomSelect={handleRoomSelect} rooms={rooms} onAddRoom={handleAddRoom} users={users} />
       )}

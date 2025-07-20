@@ -6,10 +6,11 @@ import UserSelectionBar from './UserSelectionBar';
 import { getMessages, sendMessage, deleteMessage } from '../../services/chatService';
 import '../../styles/ChatScreen.css';
 
-const ChatScreen = ({ room, onBack, currentUser, users }) => {
+const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFocusInput }) => {
   const [messages, setMessages] = useState([]);
   const [selectedSender, setSelectedSender] = useState(null);
   const [showKeyMap, setShowKeyMap] = useState(false); // KeyMap表示状態
+  const [isInputFocused, setIsInputFocused] = useState(false); // 入力フィールドのフォーカス状態
 
   useEffect(() => {
     const unsubscribe = getMessages(room.id, (fetchedMessages) => {
@@ -40,8 +41,12 @@ const ChatScreen = ({ room, onBack, currentUser, users }) => {
     }
   };
 
-  const handleToggleKeyMap = () => { // KeyMap表示切り替え関数
+  const handleToggleKeyMap = () => {
     setShowKeyMap(prev => !prev);
+  };
+
+  const handleInputFocusChange = (isFocused) => { // MessageInputからのフォーカス変更ハンドラ
+    setIsInputFocused(isFocused);
   };
 
   return (
@@ -54,7 +59,7 @@ const ChatScreen = ({ room, onBack, currentUser, users }) => {
         </button>
       </header>
       {showKeyMap ? (
-        <KeyMap onClose={handleToggleKeyMap} /> // KeyMapコンポーネントを表示
+        <KeyMap onClose={handleToggleKeyMap} isInputFocused={isInputFocused} /> // isInputFocusedを渡す
       ) : (
         <>
           <NovelTalkDisplay
@@ -66,7 +71,7 @@ const ChatScreen = ({ room, onBack, currentUser, users }) => {
             onDeleteSelectedMessages={handleDeleteSelectedMessages}
           />
           <UserSelectionBar users={users} selectedSender={selectedSender} onSelectUser={handleSelectSender} />
-          <MessageInput onSendMessage={handleSendMessage} />
+          <MessageInput onSendMessage={handleSendMessage} shouldFocus={shouldFocusInput} />
         </>
       )}
     </div>

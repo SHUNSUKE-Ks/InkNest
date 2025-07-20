@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './KeyMap.css';
 
+// キーマップの初期値をエクスポート
+export const initialKeyMaps = {
+  "デフォルト": [
+    { action: "テキスト入力中にステートを移行", mainKey: "Space", altKey: "numpad0" },
+    { action: "設定画面", mainKey: "Ctrl+Space", altKey: "" },
+  ],
+  "テキスト入力中": [
+    { action: "改行", mainKey: "Enter", altKey: "" },
+    { action: "投稿", mainKey: "Ctrl+Enter", altKey: "" },
+  ],
+};
+
 const KeyMap = ({ onClose }) => {
-  // 仮のキーマップデータ（編集可能にするためuseStateで管理）
-  const [editableKeyMaps, setEditableKeyMaps] = useState({
-    "デフォルト": [
-      { action: "テキスト入力中にステートを移行", mainKey: "Space", altKey: "numpad0" },
-      { action: "設定画面", mainKey: "Ctrl+Space", altKey: "" },
-    ],
-    "テキスト入力中": [
-      { action: "改行", mainKey: "Enter", altKey: "" },
-      { action: "投稿", mainKey: "Ctrl+Enter", altKey: "" },
-    ],
+  const [editableKeyMaps, setEditableKeyMaps] = useState(() => {
+    const savedKeyMaps = localStorage.getItem('userKeyMaps');
+    return savedKeyMaps ? JSON.parse(savedKeyMaps) : initialKeyMaps;
   });
 
   const handleKeyChange = (stateCategory, index, keyType, value) => {
@@ -25,8 +30,8 @@ const KeyMap = ({ onClose }) => {
   };
 
   const handleApply = () => {
+    localStorage.setItem('userKeyMaps', JSON.stringify(editableKeyMaps));
     console.log("適用されたキーマップ:", editableKeyMaps);
-    // ここでキーマップを保存するロジック（例: localStorage, Firebaseなど）を実装
     onClose(); // 適用後に閉じる
   };
 
