@@ -26,3 +26,12 @@
   margin: 0;
   font-size: 20px;
 }
+
+.keymap-icon-button {
+  margin-left: auto; /* 右寄せ */
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+}

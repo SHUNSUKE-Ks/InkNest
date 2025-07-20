@@ -6,6 +6,13 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 const usersCollectionRef = collection(db, 'users');
 const storage = getStorage();
 
+// ナレーション用のダミーユーザー
+const narrationUser = {
+  id: 'narration-user',
+  name: 'ナレーション',
+  avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' // 1x1 transparent PNG
+};
+
 // ユーザーを追加
 export const addUser = async (name, avatarFile) => {
   let avatarUrl = '';
@@ -34,7 +41,9 @@ export const addUser = async (name, avatarFile) => {
 export const getUsers = (callback) => {
   const unsubscribe = onSnapshot(usersCollectionRef, (snapshot) => {
     const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    callback(users);
+    // ナレーションユーザーをリストの先頭に追加
+    const allUsers = [narrationUser, ...users];
+    callback(allUsers);
   });
   return unsubscribe;
 };

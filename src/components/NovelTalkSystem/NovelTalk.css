@@ -1,0 +1,145 @@
+.novel-talk-display {
+  padding: 10px;
+  font-family: 'MS Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif; /* ゲーム風のフォント */
+  background-color: rgba(0, 0, 0, 0.7); /* 半透明の黒背景 */
+  color: white;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.novel-talk-message {
+  display: flex;
+  margin-bottom: 15px;
+  position: relative; /* 追加 */
+}
+
+.novel-talk-avatar-container {
+  margin-right: 10px;
+  position: relative; /* 絵文字選択のために relative に設定 */
+}
+
+.novel-talk-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid black; /* 太くする */
+}
+
+.novel-talk-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.novel-talk-sender {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.novel-talk-text {
+  background-color: #333;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  min-height: 6em; /* 3行分の高さを確保 (line-height * 3) */
+  line-height: 2em; /* 1行の高さを指定 */
+  width: calc(22ch + 20px); /* 20文字分の幅 + padding */
+  white-space: pre-wrap; /* 改行とスペースを保持 */
+  word-break: break-all; /* 長い単語を強制的に改行 */
+  cursor: pointer;
+  position: relative; /* 追加 */
+}
+
+.novel-talk-edit-area {
+  background-color: #222;
+  color: white;
+  border: 1px solid #777;
+  border-radius: 5px;
+  padding: 10px;
+  width: calc(22ch + 20px);
+  height: 6em;
+  line-height: 2em;
+  font-family: inherit;
+  resize: none; /* リサイズを無効化 */
+  position: relative; /* 追加 */
+}
+
+/* 絵文字ピッカーのスタイル */
+.emoji-picker {
+  position: absolute;
+  top: 0; /* アバターの横に表示 */
+  left: 50px; /* アバターの幅 + マージン */
+  background-color: #444;
+  border: 1px solid #666;
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  z-index: 10; /* 他の要素の上に表示 */
+}
+
+.emoji-item {
+  cursor: pointer;
+  font-size: 1.5em;
+  padding: 2px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.emoji-item:hover {
+  background-color: #666;
+}
+
+/* ゴミ箱アイコンのスタイル */
+.delete-icon {
+  margin-left: 10px;
+  font-size: 1.5em;
+  cursor: pointer;
+  align-self: center; /* 縦方向中央揃え */
+  color: #ff6b6b; /* 赤系の色 */
+}
+
+/* 選択されたメッセージのスタイル */
+.novel-talk-message.selected {
+  background-color: rgba(100, 100, 255, 0.3); /* 青みがかった半透明の背景 */
+  border: 1px solid rgba(100, 100, 255, 0.7);
+}
+
+/* テキストボックス追加ボタン */
+.add-textbox-button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 5px; /* テキストエリアとの間隔 */
+  align-self: flex-end; /* 右寄せ */
+}
+
+/* チェックボックスのコンテナ */
+.message-checkbox-container {
+  position: absolute; /* 絶対配置 */
+  top: 5px; /* 右上隅に配置 */
+  right: 5px; /* 右下隅に配置 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; /* チェックボックスの幅 */
+  height: 20px; /* チェックボックスの高さ */
+  background-color: rgba(255, 255, 255, 0.2); /* 半透明のグレーボックス */
+  border-radius: 4px;
+}
+
+/* チェックボックス */
+.message-checkbox {
+  width: 16px; /* チェックボックス自体のサイズ */
+  height: 16px;
+  cursor: pointer;
+}

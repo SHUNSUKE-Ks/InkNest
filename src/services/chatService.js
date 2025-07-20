@@ -7,6 +7,9 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc, // 追加
 } from 'firebase/firestore';
 
 // メッセージを送信
@@ -36,6 +39,29 @@ export const getMessages = (roomId, callback) => {
     callback(messages);
   });
   return unsubscribe;
+};
+
+// メッセージを更新 (新規追加)
+export const updateMessage = async (roomId, messageId, newText) => {
+  try {
+    const messageRef = doc(db, `rooms/${roomId}/messages`, messageId);
+    await updateDoc(messageRef, {
+      text: newText,
+      updatedAt: serverTimestamp(), // 更新日時を追加
+    });
+  } catch (e) {
+    console.error("Error updating message: ", e);
+  }
+};
+
+// メッセージを削除 (新規追加)
+export const deleteMessage = async (roomId, messageId) => {
+  try {
+    const messageRef = doc(db, `rooms/${roomId}/messages`, messageId);
+    await deleteDoc(messageRef);
+  } catch (e) {
+    console.error("Error deleting message: ", e);
+  }
 };
 
 // ルームを作成
