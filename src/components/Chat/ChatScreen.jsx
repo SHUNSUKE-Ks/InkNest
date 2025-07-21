@@ -18,6 +18,7 @@ const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFoc
   }, [users, selectedSender]);
   const [showKeyMap, setShowKeyMap] = useState(false); // KeyMap表示状態
   const [isInputFocused, setIsInputFocused] = useState(false); // 入力フィールドのフォーカス状態
+  const [keepKeyboardOpen, setKeepKeyboardOpen] = useState(false); // キーボード表示維持の状態
 
   useEffect(() => {
     const unsubscribe = getMessages(room.id, (fetchedMessages) => {
@@ -127,6 +128,14 @@ const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFoc
         <button onClick={handleToggleKeyMap} className="keymap-icon-button">
           ⌨️ {/* キーボードアイコン */}
         </button>
+        <label className="keyboard-toggle-label">
+          <input
+            type="checkbox"
+            checked={keepKeyboardOpen}
+            onChange={(e) => setKeepKeyboardOpen(e.target.checked)}
+          />
+          キーボード維持
+        </label>
       </header>
       {showKeyMap ? (
         <KeyMap onClose={handleToggleKeyMap} isInputFocused={isInputFocused} /> // isInputFocusedを渡す
@@ -145,7 +154,7 @@ const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFoc
             setResetNovelTalkDisplayFunction={setNovelTalkDisplayReset} // 新しく追加
           />
           <UserSelectionBar users={users} selectedSender={selectedSender} onSelectUser={handleSelectSender} />
-          <MessageInput onSendMessage={handleSendMessage} shouldFocus={shouldFocusInput} />
+          <MessageInput onSendMessage={handleSendMessage} shouldFocus={shouldFocusInput} keepKeyboardOpen={keepKeyboardOpen} />
         </>
       )}
     </div>

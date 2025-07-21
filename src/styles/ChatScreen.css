@@ -35,3 +35,16 @@
   cursor: pointer;
   color: white;
 }
+
+.keyboard-toggle-label {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  color: white;
+  font-size: 0.9em;
+}
+
+.keyboard-toggle-label input[type="checkbox"] {
+  margin-right: 5px;
+  cursor: pointer;
+}

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../../styles/MessageInput.css';
 import { useStateContext } from '../../context/StateContext';
 
-const MessageInput = ({ onSendMessage, shouldFocus }) => {
+const MessageInput = ({ onSendMessage, shouldFocus, keepKeyboardOpen }) => {
   const [message, setMessage] = useState('');
   const { setAppState } = useStateContext();
   const inputRef = useRef(null);
@@ -30,6 +30,9 @@ const MessageInput = ({ onSendMessage, shouldFocus }) => {
     if (message.trim()) {
       onSendMessage(message);
       setMessage('');
+      if (keepKeyboardOpen && inputRef.current) {
+        inputRef.current.focus(); // 送信後にフォーカスを戻す
+      }
     }
   };
 
