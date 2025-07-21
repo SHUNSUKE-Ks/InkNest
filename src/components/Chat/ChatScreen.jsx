@@ -8,7 +8,14 @@ import '../../styles/ChatScreen.css';
 
 const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFocusInput }) => {
   const [messages, setMessages] = useState([]);
+  const [editingMessageId, setEditingMessageId] = useState(null); // NovelTalkDisplayからリフトアップ
   const [selectedSender, setSelectedSender] = useState(null);
+
+  useEffect(() => {
+    if (users && users.length > 0 && !selectedSender) {
+      setSelectedSender(users[0]);
+    }
+  }, [users, selectedSender]);
   const [showKeyMap, setShowKeyMap] = useState(false); // KeyMap表示状態
   const [isInputFocused, setIsInputFocused] = useState(false); // 入力フィールドのフォーカス状態
 
@@ -49,6 +56,69 @@ const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFoc
     setIsInputFocused(isFocused);
   };
 
+  const handleAddMessageAt = (currentMessageId, senderId) => {
+    setMessages(prevMessages => {
+      const currentIndex = prevMessages.findIndex(msg => msg.id === currentMessageId);
+      if (currentIndex === -1) return prevMessages;
+
+      const newMessage = {
+        id: Date.now().toString(), // Simple unique ID for now
+        senderId: senderId,
+        text: '',
+        timestamp: new Date().toISOString(),
+      };
+
+      const newMessages = [
+        ...prevMessages.slice(0, currentIndex + 1),
+        newMessage,
+        ...prevMessages.slice(currentIndex + 1),
+      ];
+      setEditingMessageId(newMessage.id); // 新しいメッセージを編集モードにする
+      return newMessages;
+    });
+  };
+
+  const [novelTalkDisplayReset, setNovelTalkDisplayReset] = useState(null); // NovelTalkDisplayのリセット関数を保持
+
+  const resetNovelTalkDisplayState = () => {
+    console.log('resetNovelTalkDisplayState called');
+    if (novelTalkDisplayReset) {
+      novelTalkDisplayReset();
+    } else {
+      console.log('novelTalkDisplayReset is null or undefined');
+    }
+  };
+
+  useEffect(() => {
+    const handleCtrlQ = (event) => {
+      if (event.ctrlKey && event.key.toLowerCase() === 'q') {
+        console.log('Ctrl + Q detected in ChatScreen');
+        event.preventDefault(); // Prevent default browser behavior (e.g., closing tab)
+        setShowKeyMap(false); // Close KeyMap if open
+        resetNovelTalkDisplayState(); // Reset NovelTalkDisplay states
+      }
+    };
+
+    const handleCtrlNumber = (event) => {
+      if (event.ctrlKey && event.key >= '0' && event.key <= '9') {
+        const index = parseInt(event.key, 10);
+        if (users && users.length > index) {
+          event.preventDefault(); // Prevent default browser behavior
+          setSelectedSender(users[index]);
+          console.log(`Selected user: ${users[index].name} via Ctrl+${index}`);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleCtrlQ);
+    window.addEventListener('keydown', handleCtrlNumber);
+
+    return () => {
+      window.removeEventListener('keydown', handleCtrlQ);
+      window.removeEventListener('keydown', handleCtrlNumber);
+    };
+  }, [users, novelTalkDisplayReset]); // Add users to dependency array
+
   return (
     <div className="chat-screen">
       <header className="chat-header">
@@ -69,6 +139,10 @@ const ChatScreen = ({ room, onBack, currentUser, users, onSendMessage, shouldFoc
             room={room}
             onDeleteMessage={handleDeleteMessage}
             onDeleteSelectedMessages={handleDeleteSelectedMessages}
+            editingMessageId={editingMessageId} // 渡す
+            setEditingMessageId={setEditingMessageId} // 渡す
+            onAddMessageAt={handleAddMessageAt} // 渡す
+            setResetNovelTalkDisplayFunction={setNovelTalkDisplayReset} // 新しく追加
           />
           <UserSelectionBar users={users} selectedSender={selectedSender} onSelectUser={handleSelectSender} />
           <MessageInput onSendMessage={handleSendMessage} shouldFocus={shouldFocusInput} />

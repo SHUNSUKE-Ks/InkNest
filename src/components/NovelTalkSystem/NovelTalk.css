@@ -26,6 +26,30 @@
   border: 3px solid black; /* 太くする */
 }
 
+.avatar-change-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒 */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 5; /* 絵文字ピッカーより下、アバターより上 */
+}
+
+.avatar-change-label {
+  color: white;
+  font-size: 0.6em; /* 小さめのフォントサイズ */
+  text-align: center;
+  line-height: 1.2; /* 行の高さを調整 */
+  padding: 2px; /* テキストと枠の間に少し余白 */
+  word-break: break-word; /* 長い単語を強制的に改行 */
+}
+
 .novel-talk-content {
   display: flex;
   flex-direction: column;

@@ -1,0 +1,49 @@
+.expression-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3); /* 半透明の背景 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* AvatarChangeModalより下に */
+}
+
+.expression-selector-content {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column; /* 縦型に表示 */
+  gap: 10px;
+  max-height: 700px; /* アイコン選択ブロックの最大高さ */
+  overflow-y: auto; /* 高さを超えた場合にスクロール */
+}
+
+.expression-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.expression-item:hover {
+  background-color: #f0f0f0;
+}
+
+.expression-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.expression-name {
+  font-weight: bold;
+}

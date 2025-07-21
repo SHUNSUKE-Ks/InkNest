@@ -42,13 +42,19 @@ export const getMessages = (roomId, callback) => {
 };
 
 // メッセージを更新 (新規追加)
-export const updateMessage = async (roomId, messageId, newText) => {
+export const updateMessage = async (roomId, messageId, newText, newSenderId) => {
   try {
     const messageRef = doc(db, `rooms/${roomId}/messages`, messageId);
-    await updateDoc(messageRef, {
-      text: newText,
+    const updateData = {
       updatedAt: serverTimestamp(), // 更新日時を追加
-    });
+    };
+    if (newText !== undefined) {
+      updateData.text = newText;
+    }
+    if (newSenderId !== undefined) {
+      updateData.senderId = newSenderId;
+    }
+    await updateDoc(messageRef, updateData);
   } catch (e) {
     console.error("Error updating message: ", e);
   }

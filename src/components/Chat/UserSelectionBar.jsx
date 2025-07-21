@@ -11,6 +11,7 @@ const UserSelectionBar = ({ users, selectedSender, onSelectUser }) => {
           onClick={() => onSelectUser(user)}
         >
           <img src={user.avatar || 'https://via.placeholder.com/40'} alt={user.name} className="user-selection-avatar" />
+          <span className="user-selection-name">{user.name}</span>
         </div>
       ))}
     </div>

@@ -14,8 +14,14 @@ const MessageInput = ({ onSendMessage, shouldFocus }) => {
   }, [shouldFocus]);
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.ctrlKey) {
-      e.stopPropagation();
+    if (e.key === 'Enter') {
+      if (e.ctrlKey) {
+        e.preventDefault(); // Prevent default new line in textarea
+        handleSubmit(e);
+      } else {
+        e.stopPropagation(); // Prevent form submission on Enter alone
+        // Allow default newline behavior for textarea
+      }
     }
   };
 
@@ -29,9 +35,8 @@ const MessageInput = ({ onSendMessage, shouldFocus }) => {
 
   return (
     <form className="message-input-form" onSubmit={handleSubmit}>
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Type a message..."
@@ -39,7 +44,8 @@ const MessageInput = ({ onSendMessage, shouldFocus }) => {
         onFocus={() => setAppState('テキスト入力中')}
         onBlur={() => setAppState('デフォルト')}
         onKeyDown={handleKeyDown}
-      />
+        rows={3}
+      ></textarea>
       <button type="submit" className="message-send-button">Send</button>
     </form>
   );

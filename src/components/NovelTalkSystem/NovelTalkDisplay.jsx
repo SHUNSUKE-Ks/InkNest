@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { updateMessage, sendMessage } from '../../services/chatService'; // sendMessageをインポート
+import AvatarChangeModalForMessage from '../Chat/AvatarChangeModalForMessage'; // 新しいモーダルをインポート
 import './NovelTalk.css';
 
-const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage, onDeleteSelectedMessages }) => {
-  const [editingMessageId, setEditingMessageId] = useState(null);
+const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage, onDeleteSelectedMessages, editingMessageId, setEditingMessageId, onAddMessageAt, setResetNovelTalkDisplayFunction }) => {
   const [editingText, setEditingText] = useState('');
   const [showEmojiPickerId, setShowEmojiPickerId] = useState(null);
+  const [showAvatarChangeModalId, setShowAvatarChangeModalId] = useState(null); // 新しいステートを追加
   const [longPressedMessageId, setLongPressedMessageId] = useState(null); // 長押し中のメッセージID
   const [selectedMessages, setSelectedMessages] = useState([]); // 複数選択用
   const longPressTimer = useRef(null); // タイマー参照
@@ -39,7 +40,19 @@ const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage,
   };
 
   const handleAvatarClick = (messageId) => {
-    setShowEmojiPickerId(showEmojiPickerId === messageId ? null : messageId);
+    if (showEmojiPickerId === messageId) {
+      // 絵文字ピッカーが表示されている状態で再度クリックされたら、アイコン変更モーダルを開く
+      setShowAvatarChangeModalId(messageId);
+      setShowEmojiPickerId(null); // 絵文字ピッカーは閉じる
+    } else {
+      // それ以外の場合は絵文字ピッカーの表示を切り替える
+      setShowEmojiPickerId(messageId);
+    }
+  };
+
+  const handleUpdateMessageSender = async (messageId, newSenderId) => {
+    await updateMessage(room.id, messageId, undefined, newSenderId);
+    setShowAvatarChangeModalId(null); // モーダルを閉じる
   };
 
   const handleEmojiSelect = async (messageId, emoji) => {
@@ -89,32 +102,13 @@ const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage,
   };
 
   // 新しいテキストボックスを追加する関数
-  const handleAddTextBox = async (currentMessageId) => {
-    // 現在編集中のメッセージのインデックスを見つける
-    const currentIndex = messages.findIndex(msg => msg.id === currentMessageId);
-    if (currentIndex === -1) return;
-
-    // 新しいメッセージのデータを準備（仮の送信者と空のテキスト）
-    const newSenderId = currentUser ? currentUser.uid : users[0]?.id; // 現在のユーザーまたは最初のユーザー
+  const handleAddTextBox = (currentMessageId) => {
+    const newSenderId = currentUser ? currentUser.id : users[0]?.id; // 現在のユーザーまたは最初のユーザー
     if (!newSenderId) {
       alert("メッセージを追加するユーザーが選択されていません。");
       return;
     }
-    const newText = ""; // 空のテキストボックス
-
-    // Firebaseに新しいメッセージを送信
-    // sendMessageは新しいメッセージを末尾に追加するので、ここでは直接挿入はできない
-    // 実際には、Firebaseのトランザクションやバッチ処理で順序を考慮する必要がある
-    // ここでは簡略化のため、新しいメッセージを送信し、その後編集モードにする
-    await sendMessage(room.id, newSenderId, newText);
-
-    // 新しいメッセージが追加された後、そのメッセージを編集モードにする
-    // Firebaseのリアルタイムリスナーがメッセージリストを更新するので、
-    // その後で新しいメッセージのIDを取得して編集モードにする必要があるが、
-    // ここでは簡略化のため、一旦編集モードを解除する
-    setEditingMessageId(null);
-    setEditingText('');
-    // 理想的には、新しいメッセージのIDを取得してsetEditingMessageId(newId)とする
+    onAddMessageAt(currentMessageId, newSenderId);
   };
 
 
@@ -122,29 +116,21 @@ const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage,
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // 親コンポーネントにリセット関数を渡す
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      // クリックされた要素がdisplayRefの内部になく、かつゴミ箱状態の場合
-      // ただし、ゴミ箱アイコン自体やチェックボックスのクリックは除外
-      if (longPressedMessageId && displayRef.current && !displayRef.current.contains(event.target)) {
-        // クリックされた要素がゴミ箱アイコンまたはチェックボックスでないことを確認
-        const isDeleteIcon = event.target.closest('.delete-icon');
-        const isCheckbox = event.target.closest('.message-checkbox');
-        if (!isDeleteIcon && !isCheckbox) {
-          setLongPressedMessageId(null);
-          setSelectedMessages([]);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [longPressedMessageId]);
+    if (setResetNovelTalkDisplayFunction) {
+      console.log('NovelTalkDisplay: Passing reset function to parent');
+      setResetNovelTalkDisplayFunction(() => {
+        console.log('NovelTalkDisplay: Executing reset function');
+        setEditingText('');
+        setShowEmojiPickerId(null);
+        setShowAvatarChangeModalId(null);
+        setLongPressedMessageId(null);
+        setSelectedMessages([]);
+        setEditingMessageId(null); // 親のeditingMessageIdもリセット
+      });
+    }
+  }, [setResetNovelTalkDisplayFunction, setEditingMessageId]);
 
   return (
     <div className="novel-talk-display" ref={displayRef}> {/* refを追加 */}
@@ -187,6 +173,14 @@ const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage,
                       {emoji}
                     </span>
                   ))}
+                </div>
+              )}
+              {showEmojiPickerId === message.id && (
+                <div className="avatar-change-overlay" onClick={() => {
+                  setShowAvatarChangeModalId(message.id);
+                  setShowEmojiPickerId(null);
+                }}>
+                  <span className="avatar-change-label">Icon変更</span>
                 </div>
               )}
               </div>
@@ -241,6 +235,14 @@ const NovelTalkDisplay = ({ messages, users, currentUser, room, onDeleteMessage,
         );
       })}
       <div ref={messagesEndRef} />
+
+      {showAvatarChangeModalId && (
+        <AvatarChangeModalForMessage
+          users={users}
+          onSelectNewSender={(newSenderId) => handleUpdateMessageSender(showAvatarChangeModalId, newSenderId)}
+          onClose={() => setShowAvatarChangeModalId(null)}
+        />
+      )}
     </div>
   );
 };

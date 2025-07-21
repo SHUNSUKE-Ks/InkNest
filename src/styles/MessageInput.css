@@ -11,6 +11,8 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-right: 8px;
+  min-height: 75px; /* 3行分の最小高さ */
+  resize: vertical; /* 縦方向のリサイズを許可 */
 }
 
 .message-send-button {
