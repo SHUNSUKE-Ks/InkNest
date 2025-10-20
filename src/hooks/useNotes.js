@@ -5,12 +5,12 @@ export const useNotes = () => {
   const [notes, setNotes] = useState([]);
   const [activeNoteId, setActiveNoteId] = useState(null);
 
-  // Check if the Electron API is available
   const isElectron = !!window.electronAPI;
 
   useEffect(() => {
     const fetchNotes = async () => {
       if (isElectron && typeof window.electronAPI.getNotes === 'function') {
+        // Electron implementation
         try {
           const fetchedNotes = await window.electronAPI.getNotes();
           setNotes(fetchedNotes);
@@ -21,14 +21,18 @@ export const useNotes = () => {
           console.error("Error fetching notes from Electron API:", error);
         }
       } else {
-        // Provide mock data for browser environment
-        console.warn("Electron API not found or getNotes is not a function. Using mock data.");
-        const mockNotes = [
-          { id: '1', title: 'Mock Note', content: 'This is a mock note for browser viewing.', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), tags: [] }
-        ];
-        setNotes(mockNotes);
-        if (mockNotes.length > 0) {
-          setActiveNoteId(mockNotes[0].id);
+        // localStorage implementation for browser/PWA
+        try {
+          const savedNotes = localStorage.getItem('inknest_notes');
+          if (savedNotes) {
+            const parsedNotes = JSON.parse(savedNotes);
+            setNotes(parsedNotes);
+            if (parsedNotes.length > 0) {
+              setActiveNoteId(parsedNotes[0].id);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load or parse notes from localStorage:", error);
         }
       }
     };
@@ -37,13 +41,19 @@ export const useNotes = () => {
 
   const saveNotesToBackend = useCallback((notesToSave) => {
     if (isElectron && typeof window.electronAPI.saveNotes === 'function') {
+      // Electron implementation
       try {
         window.electronAPI.saveNotes(notesToSave);
       } catch (error) {
         console.error("Error saving notes to Electron API:", error);
       }
     } else {
-      console.log("Mock save (not persistent):", notesToSave);
+      // localStorage implementation for browser/PWA
+      try {
+        localStorage.setItem('inknest_notes', JSON.stringify(notesToSave));
+      } catch (error) {
+        console.error("Failed to save notes to localStorage:", error);
+      }
     }
   }, [isElectron]);
 
