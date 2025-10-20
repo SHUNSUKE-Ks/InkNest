@@ -1,108 +1,121 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import ChatManager from './components/ChatManager';
-import KeyMap from './MenuDB/08_Setting/KeyMap';
-import AlertModal from './MenuDB/08_Setting/AlertModal';
-import { StateProvider, useStateContext } from './context/StateContext';
-import { initialKeyMaps } from './MenuDB/08_Setting/KeyMap';
-import './styles/App.css';
+import React, { useState, useCallback, useEffect } from 'react';
+import Header from './componemts_ver2.2/Header';
+import MemoSidebar from './componemts_ver2.2/memo/MemoSidebar';
+import NoteList from './componemts_ver2.2/memo/NoteList';
+import NoteEditor from './componemts_ver2.2/memo/NoteEditor';
+import { useNotes } from './hooks/useNotes';
 
-const AppContent = () => {
-  const { appState, setAppState } = useStateContext();
-  const [showKeyMap, setShowKeyMap] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertInfo, setAlertInfo] = useState({ title: '', message: '' });
-  const [message, setMessage] = useState(''); // メッセージ入力状態
-  const [shouldFocusInput, setShouldFocusInput] = useState(false);
+const MIN_WIDTH = 100;
 
-  // --- アクション関数の定義 ---
-  const openSettings = useCallback(() => setShowKeyMap(true), []);
-  const closeSettings = useCallback(() => setShowKeyMap(false), []);
+const App = () => {
+  const {
+    notes,
+    activeNote,
+    activeNoteId,
+    setActiveNoteId,
+    updateNote,
+    createNewNote,
+  } = useNotes();
 
-  const postMessage = useCallback(() => {
-    // 本来はここでchatServiceなどを呼び出す
-    console.log('Message posted:', message);
-    setMessage('');
-  }, [message]);
+  // Resizing logic remains in the component as it's UI-related
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [noteListWidth, setNoteListWidth] = useState(320);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+  const [isResizingNoteList, setIsResizingNoteList] = useState(false);
 
-  const addNewline = useCallback(() => {
-    // 実際の改行処理はMessageInput側で行うため、ここではロジック不要
-    console.log('Newline action triggered');
-  }, []);
-
-  const focusInput = useCallback(() => {
-    setShouldFocusInput(true);
-    // フォーカスが当たった後、このフラグはリセットする必要がある
-    setTimeout(() => setShouldFocusInput(false), 0);
-  }, []);
-
-  // --- アクションマップの定義 ---
-  const actionMap = {
-    '設定画面': openSettings,
-    '投稿': postMessage,
-    '改行': addNewline,
-    'テキスト入力中にステートを移行': focusInput,
+  const handleMouseDownSidebar = (e) => {
+    e.preventDefault();
+    setIsResizingSidebar(true);
   };
 
-  const executeAction = useCallback((actionName) => {
-    const action = actionMap[actionName];
-    if (action) {
-      action();
-    } else {
-      setAlertInfo({ title: '未定義のアクション', message: `アクション「${actionName}」は定義されていません。` });
-      setShowAlert(true);
+  const handleMouseDownNoteList = (e) => {
+    e.preventDefault();
+    setIsResizingNoteList(true);
+  };
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizingSidebar(false);
+    setIsResizingNoteList(false);
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (isResizingSidebar) {
+      const newWidth = e.clientX;
+      if (newWidth > MIN_WIDTH) setSidebarWidth(newWidth);
     }
-  }, [actionMap]);
+    if (isResizingNoteList) {
+      const newWidth = e.clientX - sidebarWidth;
+      if (newWidth > MIN_WIDTH) setNoteListWidth(newWidth);
+    }
+  }, [isResizingSidebar, isResizingNoteList, sidebarWidth]);
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      const savedKeyMaps = localStorage.getItem('userKeyMaps');
-      const keyMaps = savedKeyMaps ? JSON.parse(savedKeyMaps) : initialKeyMaps;
-      const currentMappings = keyMaps[appState] || [];
-
-      for (const mapping of currentMappings) {
-        const mainKeyParts = mapping.mainKey.split('+');
-        const isCtrl = mainKeyParts.includes('Ctrl');
-        const keyName = mainKeyParts[mainKeyParts.length - 1];
-
-        // event.keyではなくevent.codeで比較する
-        if (event.code === keyName && event.ctrlKey === isCtrl) {
-          event.preventDefault();
-          executeAction(mapping.action);
-          return;
-        }
-      }
+    if (isResizingSidebar || isResizingNoteList) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [appState, executeAction]);
+  }, [isResizingSidebar, isResizingNoteList, handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="app-container">
-      <div className="chat-manager">
-        <ChatManager 
-          currentUser={{ uid: "test-user-id", email: "test@example.com" }} 
-          onSendMessage={postMessage} // 投稿関数を渡す
-          shouldFocusInput={shouldFocusInput} // フォーカス状態を渡す
-        />
+    <div>
+      <Header title="InkNest" onNewPageClick={createNewNote} />
+      <div style={styles.layout}>
+        <div style={{ width: sidebarWidth, minWidth: MIN_WIDTH }}>
+          <MemoSidebar />
+        </div>
+        
+        <div style={styles.resizer} onMouseDown={handleMouseDownSidebar} />
+
+        <div style={{ width: noteListWidth, minWidth: MIN_WIDTH }}>
+          <NoteList 
+            notes={notes} 
+            activeNoteId={activeNoteId}
+            onSelectNote={setActiveNoteId} // Pass the setter directly
+          />
+        </div>
+
+        <div style={styles.resizer} onMouseDown={handleMouseDownNoteList} />
+
+        <div style={styles.editorContainer}>
+          {activeNote ? (
+            <NoteEditor 
+              key={activeNote.id}
+              note={activeNote} 
+              onUpdate={updateNote} 
+            />
+          ) : (
+            <div>Select a note to edit or create a new one.</div>
+          )}
+        </div>
       </div>
-      {showKeyMap && <KeyMap onClose={closeSettings} />}
-      <AlertModal 
-        show={showAlert} 
-        onClose={() => setShowAlert(false)} 
-        title={alertInfo.title} 
-        message={alertInfo.message} 
-      />
     </div>
   );
-}
+};
 
-function App() {
-  return (
-    <StateProvider>
-      <AppContent />
-    </StateProvider>
-  );
-}
+const styles = {
+  layout: {
+    display: 'flex',
+    height: 'calc(100vh - 56px)', // Re-add the height calculation
+    overflow: 'hidden',
+  },
+  resizer: {
+    width: '5px',
+    cursor: 'col-resize',
+    background: '#e0e0e0',
+    zIndex: 100,
+  },
+  editorContainer: {
+    flex: 1,
+    display: 'flex',
+    minWidth: MIN_WIDTH,
+  },
+};
 
 export default App;
