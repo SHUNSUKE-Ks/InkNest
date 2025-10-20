@@ -23,3 +23,7 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
+
+.app-header a {
+  color: inherit;
+}
